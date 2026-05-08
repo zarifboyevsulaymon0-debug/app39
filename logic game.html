@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Brain Game</title>
+    <style>
+        :root {
+            --primary: #4776E6;
+            --secondary: #8E54E9;
+            --bg: #1a1a2e;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 { margin-bottom: 10px; text-shadow: 0 0 10px rgba(142, 84, 233, 0.5); }
+
+        .game-stats {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: #00d2ff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .card {
+            aspect-ratio: 1;
+            background: #16213e;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: transform 0.3s, background 0.3s;
+            border: 2px solid #0f3460;
+        }
+
+        .card.flipped {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            transform: rotateY(180deg);
+            border-color: white;
+        }
+
+        .card.matched {
+            background: #22c55e;
+            visibility: visible;
+            opacity: 0.8;
+            cursor: default;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: transparent;
+            color: white;
+            border: 2px solid var(--secondary);
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button:hover { background: var(--secondary); }
+    </style>
+</head>
+<body>
+
+    <h2>Memory Match</h2>
+    <div class="game-stats">Urinishlar: <span id="moves">0</span></div>
+
+    <div class="grid" id="gameGrid"></div>
+
+    <button onclick="startGame()">O'yinni yangilash</button>
+
+    <script>
+        const emojis = ['🚀', '🚀', '💎', '💎', '🔥', '🔥', '👻', '👻', '🍀', '🍀', '🍕', '🍕', '🎸', '🎸', '🌈', '🌈'];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function startGame() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            document.getElementById('moves').innerText = moves;
+
+            const shuffledEmojis = shuffle([...emojis]);
+
+            shuffledEmojis.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.onclick = () => flipCard(card);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (flippedCards.length < 2 && !card.classList.contains('flipped') && !card.classList.contains('matched')) {
+                card.classList.add('flipped');
+                card.innerText = card.dataset.emoji;
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    moves++;
+                    document.getElementById('moves').innerText = moves;
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedPairs++;
+                flippedCards = [];
+                
+                if (matchedPairs === emojis.length / 2) {
+                    setTimeout(() => alert(`G'alaba! ${moves} ta urinishda topdingiz.`), 500);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.innerText = '';
+                    card2.innerText = '';
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
